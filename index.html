@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"> -->
+    <title></title>
+  </head>
+  <style type="text/css">
+
+  </style>
+  <body style="margin: 0;overflow-x: hidden;">
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>
+<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" ></script>
+<script src="https://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://webservice.jshcsoft.com/weixin/sha.js"></script>
+<script type="text/javascript">
+  function share() {
+    $.ajax({
+        //后台获取参数接口
+        url: "https://activity.jshcsoft.com/survey/api/api/FixActivity/GetTicket?appid=wx9cec35e64dce69fc",
+        type: 'get',
+        success: function(data) {
+            //时间戳
+            var strtimestamp = parseInt((new Date()).getTime() / 1000, 0);
+            //随机字符串
+            var strnonceStr = createNonceStr();
+            var strsignature="";
+
+            //得到参数
+            var appId = 'wx9cec35e64dce69fc';
+            var jsapi_ticket = data;
+            strsignature = "jsapi_ticket=" + jsapi_ticket + "&noncestr=" + strnonceStr + "&timestamp=" + strtimestamp + "&url=" + location.href;
+            var hashObj = new jsSHA(strsignature, "TEXT");
+            strsignature = hashObj.getHash('SHA-1', 'HEX', parseInt(1, 10));
+
+            sessionStorage.setItem("nonceStr",strnonceStr);
+            sessionStorage.setItem("signature",strsignature);
+            sessionStorage.setItem("timestamp",strtimestamp);
+
+            var shareinfo="";
+            var link="";
+            var title="招标宝典";
+            shareinfo="招标信息免费订阅,商业商机随时掌握,全国范围千万数据,每天定时精准送达";
+
+            link='https://weixin.jshcsoft.com/biddingbook/mweb?AppID=wx9cec35e64dce69fc&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
+            if(window.location.href.indexOf("share")>0){
+              shareinfo="助力分享你我他,快乐生活靠大家";
+              title="助力分享";
+              link=sessionStorage.getItem("shareurl")
+            }
+            // var shareUrl = 'http://open.weixin.qq.com/connect/oauth2/authorize?appid=wx9cec35e64dce69fc&redirect_uri=http://weixin.jshcsoft.com/mqy/ZBSystem/lscs?AppID=wx9cec35e64dce69fc&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
+            //通过微信config接口注入配置
+            wx.config({
+                debug: false, // 默认为false  为true的时候是调试模式，会打印出日志
+                appId: appId,
+                timestamp: strtimestamp,
+                nonceStr: strnonceStr,
+                signature: strsignature,
+                jsApiList: [
+                    'checkJsApi',
+                    'onMenuShareTimeline',
+                    'onMenuShareAppMessage',
+                    'onMenuShareQQ',
+                    // 'updateAppMessageShareData'
+                ]
+            });
+            
+            wx.ready(function() {
+              if(sessionStorage.getItem("sharetitle")==null){
+                share_config.share.shareinfo="招标信息免费订阅,商业商机随时掌握,全国范围千万数据,每天定时精准送达";
+                share_config.share.link=link;
+              } else {
+                share_config.share.shareinfo=sessionStorage.getItem("sharetitle");
+                share_config.share.link=window.localStorage.href;
+              }
+                wx.onMenuShareAppMessage(share_config.share); // 微信好友
+                wx.onMenuShareTimeline(share_config.share); // 微信朋友圈
+                wx.onMenuShareQQ(share_config.share); // QQ
+                // wx.updateAppMessageShareData(share_config.share);
+            });
+            //配置自定义分享内容
+            window.share_config = {
+                'share': {
+                    'imgUrl': 'http://weixin.jshcsoft.com/biddingbook/mweb/static/img/logo.8744cdb.png', // 这里是需要展示的图标
+                    'desc': shareinfo,
+                    'title': title, // 这是分享展示卡片的标题
+                    'link': link, // 这里是分享的网址
+                    'success': function(rr) {
+
+                    },
+                    'cancel': function(tt) {
+                         
+                    }
+                }
+            };
+        },
+        error: function(err) {
+              // alert(err)
+        },
+    });
+  }
+
+ 
+  function createNonceStr() {
+      var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      var str = "";
+      for (var i = 0; i < 16; i++) {
+          var r = Math.floor(Math.random() * chars.length);
+          str += chars[r];
+      }
+      return str;
+  }
+
+  
+share();
+</script>
+
+
